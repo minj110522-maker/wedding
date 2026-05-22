@@ -356,6 +356,19 @@
     font-size: 18px; letter-spacing: .2em; color: var(--ink); margin-top: 14px;
   }
   .footer .credit { font-size: 11px; color: var(--ink-faint); margin-top: 30px; letter-spacing: .05em; }
+  .kakao-share {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    margin-top: 26px; padding: 13px 24px;
+    background: #FEE500; color: #3C1E1E;
+    border: none; border-radius: 30px;
+    font-family: inherit; font-size: 14px; letter-spacing: .02em;
+    cursor: pointer; transition: filter .2s;
+  }
+  .kakao-share:active { filter: brightness(.94); }
+  .kakao-ico {
+    width: 18px; height: 18px; display: inline-block;
+    background: no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%233C1E1E' d='M12 3C6.48 3 2 6.58 2 11c0 2.86 1.92 5.37 4.8 6.78-.21.77-.76 2.78-.87 3.21-.14.54.2.53.42.39.17-.11 2.71-1.84 3.81-2.59.59.08 1.2.13 1.84.13 5.52 0 10-3.58 10-8S17.52 3 12 3z'/%3E%3C/svg%3E");
+  }
 
   .toast {
     position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(20px);
@@ -497,6 +510,9 @@
   <footer class="footer reveal">
     <div class="heart">Thank you</div>
     <div class="fnames">준영 &amp; 민정</div>
+    <button class="kakao-share" onclick="shareKakao()">
+      <span class="kakao-ico" aria-hidden="true"></span>카카오톡으로 공유하기
+    </button>
     <div class="credit">2026. 10. 31 &nbsp;ⓒ Our Wedding</div>
   </footer>
 
@@ -510,6 +526,7 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="https://t1.kakao.com/kakao_js_sdk/2.7.2/kakao.min.js" async crossorigin="anonymous"></script>
 <script>
   /* ── scroll reveal ── */
   const io = new IntersectionObserver((entries) => {
@@ -594,6 +611,27 @@
     document.getElementById('lightbox').classList.add('show');
   }
   function closeLightbox(){ document.getElementById('lightbox').classList.remove('show'); }
+
+  /* ── 카카오톡 공유 ── */
+  const SITE_URL = 'https://minj110522-maker.github.io/wedding/';
+  const MAP_URL = 'https://map.kakao.com/?q=' + encodeURIComponent('이비스 앰배서더 수원');
+  function shareKakao() {
+    if (!window.Kakao || !Kakao.Share) { showToast('공유 기능을 불러오는 중입니다. 잠시 후 다시 시도해 주세요'); return; }
+    if (!Kakao.isInitialized()) Kakao.init('f14896345ec9e7a12ae7a36ce1cb1314');
+    Kakao.Share.sendDefault({
+      objectType: 'feed',
+      content: {
+        title: '준영 ♥ 민정 결혼합니다',
+        description: '2026년 10월 31일 토요일 오전 11시\n이비스 앰배서더 수원 15층 베르사이유홀',
+        imageUrl: SITE_URL + 'images/main.jpg',
+        link: { mobileWebUrl: SITE_URL, webUrl: SITE_URL }
+      },
+      buttons: [
+        { title: '청첩장 보기', link: { mobileWebUrl: SITE_URL, webUrl: SITE_URL } },
+        { title: '위치 보기', link: { mobileWebUrl: MAP_URL, webUrl: MAP_URL } }
+      ]
+    });
+  }
 
   /* RSVP·방명록은 아래 Firebase 모듈에서 처리합니다 */
 </script>
