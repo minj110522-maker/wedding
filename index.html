@@ -671,20 +671,26 @@
   const MAP_URL = 'https://map.kakao.com/?q=' + encodeURIComponent('이비스 앰배서더 수원');
   const KAKAO_SDK = 'https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js';
 
-  // SDK가 아직 안 떴으면 직접 불러온 뒤 콜백 실행
+  // SDK가 아직 안 떴으면 새 스크립트로 다시 불러온 뒤 콜백 실행
   function ensureKakao(onReady) {
     if (window.Kakao && Kakao.Share) { onReady(); return; }
-    let s = document.getElementById('kakao-sdk');
-    if (!s) {
-      s = document.createElement('script');
-      s.id = 'kakao-sdk';
-      s.src = KAKAO_SDK;
-      s.crossOrigin = 'anonymous';
-      document.head.appendChild(s);
-    }
     showToast('공유 기능을 불러오는 중입니다…');
-    s.addEventListener('load', () => onReady(), { once: true });
-    s.addEventListener('error', () => showToast('공유 기능을 불러오지 못했습니다. 네트워크를 확인해 주세요'), { once: true });
+    const old = document.getElementById('kakao-sdk');
+    if (old) old.remove();                 // load 이벤트가 확실히 다시 발생하도록 새로 생성
+    const s = document.createElement('script');
+    s.id = 'kakao-sdk';
+    s.src = KAKAO_SDK;
+    s.crossOrigin = 'anonymous';
+    let done = false;
+    const finish = (ok) => {
+      if (done) return; done = true;
+      if (ok && window.Kakao && Kakao.Share) onReady();
+      else showToast('공유 기능을 불러오지 못했습니다. 네트워크를 확인해 주세요');
+    };
+    s.onload = () => finish(true);
+    s.onerror = () => finish(false);
+    setTimeout(() => finish(false), 8000);  // 8초 내 미로드 시 실패 처리
+    document.head.appendChild(s);
   }
 
   function shareKakao() {
