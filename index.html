@@ -671,50 +671,61 @@
   const MAP_URL = 'https://map.kakao.com/?q=' + encodeURIComponent('이비스 앰배서더 수원');
   const KAKAO_SDK = 'https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js';
 
-  // SDK가 아직 안 떴으면 새 스크립트로 다시 불러온 뒤 콜백 실행
-  function ensureKakao(onReady) {
+  // SDK 로드를 시도하고, 되면 onReady / 안 되면 onFail
+  function ensureKakao(onReady, onFail) {
     if (window.Kakao && Kakao.Share) { onReady(); return; }
-    showToast('공유 기능을 불러오는 중입니다…');
     const old = document.getElementById('kakao-sdk');
     if (old) old.remove();                 // load 이벤트가 확실히 다시 발생하도록 새로 생성
     const s = document.createElement('script');
     s.id = 'kakao-sdk';
     s.src = KAKAO_SDK;
     let done = false;
-    const finish = (why) => {
+    const settle = () => {
       if (done) return; done = true;
-      if (why === 'ok' && window.Kakao && Kakao.Share) { onReady(); return; }
-      // 진단용: 어디서 실패했는지 표시
-      let msg = '공유 실패';
-      if (why === 'error') msg = '[A] 스크립트 로드 거부됨 (차단/네트워크)';
-      else if (why === 'timeout') msg = '[B] 8초 내 로드 안 됨 (느림/차단)';
-      else if (why === 'ok') msg = '[C] 로드는 됐으나 Kakao 미정의';
-      showToast(msg);
+      (window.Kakao && Kakao.Share) ? onReady() : onFail();
     };
-    s.onload = () => finish('ok');
-    s.onerror = () => finish('error');
-    setTimeout(() => finish('timeout'), 8000);
+    s.onload = settle;
+    s.onerror = settle;
+    setTimeout(settle, 5000);
     document.head.appendChild(s);
+  }
+
+  // 카카오 SDK가 안 될 때: 기기 기본 공유 시트 → 그것도 없으면 링크 복사
+  function shareFallback() {
+    if (navigator.share) {
+      navigator.share({
+        title: '준영 ♥ 민정 결혼합니다',
+        text: '2026년 10월 31일 토요일 오전 11시 · 이비스 앰배서더 수원',
+        url: SITE_URL
+      }).catch(() => {});
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(SITE_URL)
+        .then(() => showToast('링크가 복사되었습니다. 카카오톡에 붙여넣어 주세요'))
+        .catch(() => showToast('링크: ' + SITE_URL));
+    } else {
+      showToast('링크: ' + SITE_URL);
+    }
   }
 
   function shareKakao() {
     ensureKakao(() => {
-      if (!window.Kakao || !Kakao.Share) { showToast('공유 기능을 불러오지 못했습니다'); return; }
       if (!Kakao.isInitialized()) Kakao.init('f14896345ec9e7a12ae7a36ce1cb1314');
-      Kakao.Share.sendDefault({
-        objectType: 'feed',
-        content: {
-          title: '준영 ♥ 민정 결혼합니다',
-          description: '2026년 10월 31일 토요일 오전 11시\n이비스 앰배서더 수원 15층 베르사이유홀',
-          imageUrl: SITE_URL + 'images/main.jpg',
-          link: { mobileWebUrl: SITE_URL, webUrl: SITE_URL }
-        },
-        buttons: [
-          { title: '청첩장 보기', link: { mobileWebUrl: SITE_URL, webUrl: SITE_URL } },
-          { title: '위치 보기', link: { mobileWebUrl: MAP_URL, webUrl: MAP_URL } }
-        ]
-      });
-    });
+      try {
+        Kakao.Share.sendDefault({
+          objectType: 'feed',
+          content: {
+            title: '준영 ♥ 민정 결혼합니다',
+            description: '2026년 10월 31일 토요일 오전 11시\n이비스 앰배서더 수원 15층 베르사이유홀',
+            imageUrl: SITE_URL + 'images/main.jpg',
+            link: { mobileWebUrl: SITE_URL, webUrl: SITE_URL }
+          },
+          buttons: [
+            { title: '청첩장 보기', link: { mobileWebUrl: SITE_URL, webUrl: SITE_URL } },
+            { title: '위치 보기', link: { mobileWebUrl: MAP_URL, webUrl: MAP_URL } }
+          ]
+        });
+      } catch (e) { shareFallback(); }
+    }, shareFallback);
   }
 
   /* RSVP·방명록은 아래 Firebase 모듈에서 처리합니다 */
