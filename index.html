@@ -546,7 +546,7 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" async crossorigin="anonymous"></script>
+<script id="kakao-sdk" src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" async crossorigin="anonymous"></script>
 <script>
   /* ── scroll reveal ── */
   const io = new IntersectionObserver((entries) => {
@@ -669,21 +669,41 @@
   /* ── 카카오톡 공유 ── */
   const SITE_URL = 'https://minj110522-maker.github.io/wedding/';
   const MAP_URL = 'https://map.kakao.com/?q=' + encodeURIComponent('이비스 앰배서더 수원');
+  const KAKAO_SDK = 'https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js';
+
+  // SDK가 아직 안 떴으면 직접 불러온 뒤 콜백 실행
+  function ensureKakao(onReady) {
+    if (window.Kakao && Kakao.Share) { onReady(); return; }
+    let s = document.getElementById('kakao-sdk');
+    if (!s) {
+      s = document.createElement('script');
+      s.id = 'kakao-sdk';
+      s.src = KAKAO_SDK;
+      s.crossOrigin = 'anonymous';
+      document.head.appendChild(s);
+    }
+    showToast('공유 기능을 불러오는 중입니다…');
+    s.addEventListener('load', () => onReady(), { once: true });
+    s.addEventListener('error', () => showToast('공유 기능을 불러오지 못했습니다. 네트워크를 확인해 주세요'), { once: true });
+  }
+
   function shareKakao() {
-    if (!window.Kakao || !Kakao.Share) { showToast('공유 기능을 불러오는 중입니다. 잠시 후 다시 시도해 주세요'); return; }
-    if (!Kakao.isInitialized()) Kakao.init('f14896345ec9e7a12ae7a36ce1cb1314');
-    Kakao.Share.sendDefault({
-      objectType: 'feed',
-      content: {
-        title: '준영 ♥ 민정 결혼합니다',
-        description: '2026년 10월 31일 토요일 오전 11시\n이비스 앰배서더 수원 15층 베르사이유홀',
-        imageUrl: SITE_URL + 'images/main.jpg',
-        link: { mobileWebUrl: SITE_URL, webUrl: SITE_URL }
-      },
-      buttons: [
-        { title: '청첩장 보기', link: { mobileWebUrl: SITE_URL, webUrl: SITE_URL } },
-        { title: '위치 보기', link: { mobileWebUrl: MAP_URL, webUrl: MAP_URL } }
-      ]
+    ensureKakao(() => {
+      if (!window.Kakao || !Kakao.Share) { showToast('공유 기능을 불러오지 못했습니다'); return; }
+      if (!Kakao.isInitialized()) Kakao.init('f14896345ec9e7a12ae7a36ce1cb1314');
+      Kakao.Share.sendDefault({
+        objectType: 'feed',
+        content: {
+          title: '준영 ♥ 민정 결혼합니다',
+          description: '2026년 10월 31일 토요일 오전 11시\n이비스 앰배서더 수원 15층 베르사이유홀',
+          imageUrl: SITE_URL + 'images/main.jpg',
+          link: { mobileWebUrl: SITE_URL, webUrl: SITE_URL }
+        },
+        buttons: [
+          { title: '청첩장 보기', link: { mobileWebUrl: SITE_URL, webUrl: SITE_URL } },
+          { title: '위치 보기', link: { mobileWebUrl: MAP_URL, webUrl: MAP_URL } }
+        ]
+      });
     });
   }
 
