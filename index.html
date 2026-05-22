@@ -13,7 +13,7 @@
 <meta property="og:image:height" content="630">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Nanum+Myeongjo:wght@400;700;800&family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,600;1,700&family=Nanum+Myeongjo:wght@400;700;800&family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #fafaf8;
@@ -91,38 +91,26 @@
   }
   .hero-text {
     position: absolute;
-    top: 44px;
+    top: 18px;
     left: 0; right: 0;
   }
   .hero-eyebrow {
+    display: block;
+    width: max-content;
+    margin: 0 auto;
     font-family: 'Cormorant Garamond', serif;
     font-style: italic;
-    font-size: 17px;
-    letter-spacing: .35em;
+    font-weight: 700;
+    font-size: 19px;
+    letter-spacing: .32em;
     color: #fff;
     text-transform: uppercase;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 0 18px rgba(0,0,0,0.3);
-    opacity: 0;
-    animation: heroFadeDown 1.4s cubic-bezier(.16,.84,.44,1) .55s forwards;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.55), 0 0 18px rgba(0,0,0,0.35);
+    clip-path: inset(0 100% 0 0);
+    animation: heroType 0.8s steps(21, end) 0.25s forwards;
   }
-  .hero-eyebrow::before {
-    content: '';
-    display: block;
-    width: 1px;
-    height: 30px;
-    margin: 0 auto 16px;
-    background: rgba(255,255,255,0.75);
-    transform-origin: top;
-    transform: scaleY(0);
-    animation: heroLineGrow 1s cubic-bezier(.16,.84,.44,1) .15s forwards;
-  }
-  @keyframes heroFadeDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes heroLineGrow {
-    from { transform: scaleY(0); }
-    to   { transform: scaleY(1); }
+  @keyframes heroType {
+    to { clip-path: inset(0 0 0 0); }
   }
   .hero-bottom {
     position: absolute;
@@ -132,17 +120,26 @@
     text-shadow: 0 1px 18px rgba(0,0,0,0.35);
   }
   .hero-names {
+    display: block;
+    width: max-content;
+    margin: 0 auto;
     font-family: 'Cormorant Garamond', serif;
     font-size: 34px;
     font-weight: 400;
     letter-spacing: .08em;
+    clip-path: inset(0 100% 0 0);
+    animation: heroType 0.85s steps(18, end) 1.2s forwards;
   }
   .hero-names .amp { font-style: italic; opacity: .85; margin: 0 .25em; font-weight: 300; }
   .hero-date {
-    margin-top: 6px;
+    display: block;
+    width: max-content;
+    margin: 6px auto 0;
     font-size: 14px;
     letter-spacing: .25em;
     font-family: 'Cormorant Garamond', serif;
+    clip-path: inset(0 100% 0 0);
+    animation: heroType 1s steps(28, end) 1.3s forwards;
   }
 
   /* ─── section base ─── */
