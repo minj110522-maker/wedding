@@ -546,7 +546,7 @@
 
 <div class="toast" id="toast"></div>
 
-<script id="kakao-sdk" src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" async crossorigin="anonymous"></script>
+<script id="kakao-sdk" src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" async></script>
 <script>
   /* ── scroll reveal ── */
   const io = new IntersectionObserver((entries) => {
@@ -680,16 +680,20 @@
     const s = document.createElement('script');
     s.id = 'kakao-sdk';
     s.src = KAKAO_SDK;
-    s.crossOrigin = 'anonymous';
     let done = false;
-    const finish = (ok) => {
+    const finish = (why) => {
       if (done) return; done = true;
-      if (ok && window.Kakao && Kakao.Share) onReady();
-      else showToast('공유 기능을 불러오지 못했습니다. 네트워크를 확인해 주세요');
+      if (why === 'ok' && window.Kakao && Kakao.Share) { onReady(); return; }
+      // 진단용: 어디서 실패했는지 표시
+      let msg = '공유 실패';
+      if (why === 'error') msg = '[A] 스크립트 로드 거부됨 (차단/네트워크)';
+      else if (why === 'timeout') msg = '[B] 8초 내 로드 안 됨 (느림/차단)';
+      else if (why === 'ok') msg = '[C] 로드는 됐으나 Kakao 미정의';
+      showToast(msg);
     };
-    s.onload = () => finish(true);
-    s.onerror = () => finish(false);
-    setTimeout(() => finish(false), 8000);  // 8초 내 미로드 시 실패 처리
+    s.onload = () => finish('ok');
+    s.onerror = () => finish('error');
+    setTimeout(() => finish('timeout'), 8000);
     document.head.appendChild(s);
   }
 
