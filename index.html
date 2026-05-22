@@ -319,40 +319,6 @@
   }
   .acc-copy:active { background: var(--accent); color: #fff; }
 
-  /* ─── RSVP ─── */
-  .rsvp { background: var(--paper); text-align: center; }
-  .rsvp .desc { font-size: 14px; color: var(--ink-soft); margin-bottom: 26px; word-break: keep-all; }
-  .rsvp-form { text-align: left; }
-  .field { margin-bottom: 16px; }
-  .field label { display: block; font-size: 13px; color: var(--ink-soft); margin-bottom: 7px; }
-  .field input, .field select {
-    width: 100%; padding: 12px 14px;
-    border: 1px solid var(--line); border-radius: 4px;
-    font-family: inherit; font-size: 15px; color: var(--ink);
-    background: var(--bg);
-  }
-  .field input:focus, .field select:focus { outline: none; border-color: var(--accent); }
-  .seg { display: flex; gap: 8px; }
-  .seg label {
-    flex: 1; text-align: center; padding: 12px 0;
-    border: 1px solid var(--line); border-radius: 4px;
-    cursor: pointer; margin: 0; font-size: 14px; color: var(--ink-soft);
-    transition: all .2s;
-  }
-  .seg input { display: none; }
-  .seg input:checked + span { font-weight: 700; }
-  .seg label:has(input:checked) { border-color: var(--accent-deep); background: #f3efe7; color: var(--ink); }
-  .submit-btn {
-    width: 100%; padding: 15px;
-    background: var(--ink); color: #fff;
-    border: none; border-radius: 4px;
-    font-family: inherit; font-size: 15px; letter-spacing: .1em;
-    cursor: pointer; margin-top: 8px;
-  }
-  .submit-btn:active { background: #000; }
-  .rsvp-thanks { display: none; font-size: 15px; color: var(--accent-deep); padding: 30px 0; }
-  .rsvp-thanks.show { display: block; }
-
   /* ─── GUESTBOOK ─── */
   .gb-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
   .gb-form input, .gb-form textarea {
@@ -522,38 +488,6 @@
     </div>
   </section>
 
-  <!-- RSVP -->
-  <section class="rsvp reveal">
-    <div class="label">R.S.V.P</div>
-    <p class="desc">참석 여부를 미리 알려주시면<br>준비에 큰 도움이 됩니다.</p>
-    <form class="rsvp-form" id="rsvpForm" onsubmit="submitRsvp(event)">
-      <div class="field">
-        <label>참석 여부</label>
-        <div class="seg">
-          <label><input type="radio" name="attend" value="참석" checked><span>참석합니다</span></label>
-          <label><input type="radio" name="attend" value="불참"><span>어렵습니다</span></label>
-        </div>
-      </div>
-      <div class="field">
-        <label>구분</label>
-        <div class="seg">
-          <label><input type="radio" name="side" value="신랑측" checked><span>신랑측</span></label>
-          <label><input type="radio" name="side" value="신부측"><span>신부측</span></label>
-        </div>
-      </div>
-      <div class="field">
-        <label>성함</label>
-        <input type="text" name="name" placeholder="성함을 입력해 주세요" required>
-      </div>
-      <div class="field">
-        <label>참석 인원 (본인 포함)</label>
-        <input type="number" name="count" min="1" value="1" required>
-      </div>
-      <button type="submit" class="submit-btn">전 달 하 기</button>
-    </form>
-    <div class="rsvp-thanks" id="rsvpThanks">소중한 마음 감사합니다 ♥<br>당일 반갑게 맞이하겠습니다.</div>
-  </section>
-
   <!-- GUESTBOOK -->
   <section class="reveal">
     <div class="center"><div class="label">Guestbook</div></div>
@@ -697,29 +631,6 @@
 
   const db = getFirestore(initializeApp(firebaseConfig));
   const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-
-  /* ── RSVP 저장 ── */
-  window.submitRsvp = async function (e) {
-    e.preventDefault();
-    const f = e.target;
-    const btn = f.querySelector('.submit-btn');
-    btn.disabled = true;
-    try {
-      await addDoc(collection(db, 'rsvp'), {
-        attend: f.attend.value,
-        side: f.side.value,
-        name: f.name.value.trim(),
-        count: Number(f.count.value),
-        createdAt: serverTimestamp()
-      });
-      f.style.display = 'none';
-      document.getElementById('rsvpThanks').classList.add('show');
-    } catch (err) {
-      console.error('RSVP 저장 실패:', err);
-      btn.disabled = false;
-      window.showToast('전송에 실패했습니다. 잠시 후 다시 시도해 주세요');
-    }
-  };
 
   /* ── 방명록 등록 ── */
   window.addGuest = async function () {
