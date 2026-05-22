@@ -672,8 +672,9 @@
   const KAKAO_SDK = 'https://t1.kakaocdn.net/kakao_js_sdk/2.8.0/kakao.min.js';
 
   // SDK 로드를 시도하고, 되면 onReady / 안 되면 onFail
+  // ※ 판단 기준은 window.Kakao 존재 여부 (Kakao.Share는 init 이후 생길 수 있음)
   function ensureKakao(onReady, onFail) {
-    if (window.Kakao && Kakao.Share) { onReady(); return; }
+    if (window.Kakao) { onReady(); return; }
     const old = document.getElementById('kakao-sdk');
     if (old) old.remove();                 // load 이벤트가 확실히 다시 발생하도록 새로 생성
     const s = document.createElement('script');
@@ -682,11 +683,11 @@
     let done = false;
     const settle = () => {
       if (done) return; done = true;
-      (window.Kakao && Kakao.Share) ? onReady() : onFail();
+      window.Kakao ? onReady() : onFail();
     };
     s.onload = settle;
     s.onerror = settle;
-    setTimeout(settle, 5000);
+    setTimeout(settle, 8000);
     document.head.appendChild(s);
   }
 
@@ -710,6 +711,7 @@
   function shareKakao() {
     ensureKakao(() => {
       if (!Kakao.isInitialized()) Kakao.init('f14896345ec9e7a12ae7a36ce1cb1314');
+      if (!Kakao.Share) { shareFallback(); return; }   // 그래도 Share 없으면 기본 공유
       try {
         Kakao.Share.sendDefault({
           objectType: 'feed',
