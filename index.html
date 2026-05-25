@@ -221,28 +221,38 @@
   }
   .dday-line b { color: var(--accent-deep); font-weight: 700; }
 
-  /* ─── GALLERY ─── */
+  /* ─── GALLERY (폴라로이드 스타일) ─── */
   .gallery-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 6px;
-    margin-top: 10px;
+    gap: 14px 10px;
+    margin-top: 14px;
+    padding: 6px 2px;
   }
-  .gallery-grid img, .gphoto {
+  .polaroid {
+    background: #ffffff;
+    padding: 6px 6px 20px;
+    box-shadow:
+      0 2px 6px rgba(43,41,38,0.15),
+      0 1px 2px rgba(43,41,38,0.08);
+    cursor: pointer;
+    transition: transform .25s ease, box-shadow .25s ease;
+    display: block;
+  }
+  .polaroid img {
     width: 100%;
     aspect-ratio: 1;
     object-fit: cover;
-    border-radius: 3px;
-    background: linear-gradient(135deg, #ece8e0, #ddd6c8);
-    cursor: pointer;
     display: block;
-    transition: opacity .3s, transform .3s;
+    background: linear-gradient(135deg, #ece8e0, #ddd6c8);
   }
-  .gallery-grid img:active { transform: scale(.97); }
-  .gphoto {
-    display: flex; align-items: center; justify-content: center;
-    color: var(--ink-faint); font-family: 'Cormorant Garamond', serif;
-    font-size: 12px; letter-spacing: .05em;
+  /* 자연스러운 폴라로이드 산개 효과 (살짝 기울기) */
+  .polaroid:nth-child(3n+1) { transform: rotate(-1.6deg); }
+  .polaroid:nth-child(3n+2) { transform: rotate(0.8deg); }
+  .polaroid:nth-child(3n+3) { transform: rotate(-0.4deg); }
+  .polaroid:active {
+    transform: rotate(0) scale(.96);
+    box-shadow: 0 4px 12px rgba(43,41,38,0.22), 0 2px 4px rgba(43,41,38,0.10);
   }
   /* 처음 9장 이후는 숨김, 펼치면 보임 */
   .gallery-grid.collapsed > .g-hidden { display: none; }
@@ -631,14 +641,17 @@
   for (let i = 1; i <= TOTAL_PHOTOS; i++) {
     photoSrcs.push(photoSrc(i));
     const idx = i - 1;
+    const cell = document.createElement('div');
+    cell.className = 'polaroid';
     const img = document.createElement('img');
     img.src = photoSrc(i);
     img.alt = `웨딩 사진 ${i}`;
     img.loading = 'lazy';
-    img.addEventListener('click', () => openLightbox(idx));
+    cell.appendChild(img);
+    cell.addEventListener('click', () => openLightbox(idx));
 
-    if (i > SHOW_FIRST) img.classList.add('g-hidden');
-    galleryEl.appendChild(img);
+    if (i > SHOW_FIRST) cell.classList.add('g-hidden');
+    galleryEl.appendChild(cell);
   }
 
   function toggleGallery() {
